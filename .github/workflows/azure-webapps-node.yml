@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>律师函生成器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .step { display: none; }
+        .step.active { display: block; }
+        #letter-preview {
+            font-family: "SimSun", serif;
+            line-height: 1.8;
+            padding: 2cm;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-2xl mx-auto py-8 px-4">
+        <h1 class="text-2xl font-bold text-center text-blue-800 mb-4">律师函生成器</h1>
+        
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <form id="letter-form">
+                <!-- 步骤1: 基本信息 -->
+                <div id="step-1" class="step active p-6">
+                    <h2 class="text-xl font-bold mb-4">基本信息</h2>
+                    
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">发函方名称</label>
+                            <input type="text" id="sender-name" class="w-full border rounded p-2" value="上海某某公司">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">发函方地址</label>
+                            <input type="text" id="sender-address" class="w-full border rounded p-2" value="上海市某某路100号">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">联系人</label>
+                            <input type="text" id="sender-contact" class="w-full border rounded p-2" value="张经理">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">联系电话</label>
+                            <input type="text" id="sender-phone" class="w-full border rounded p-2" value="13800138000">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">受函方名称</label>
+                            <input type="text" id="receiver-name" class="w-full border rounded p-2" value="北京某某工作室">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">受函方地址</label>
+                            <input type="text" id="receiver-address" class="w-full border rounded p-2" value="北京市某某大厦200室">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">律师事务所</label>
+                            <input type="text" id="law-firm" class="w-full border rounded p-2" value="上海正义律师事务所">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">代理律师</label>
+                            <input type="text" id="lawyer-name" class="w-full border rounded p-2" value="李四">
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="next-step bg-blue-600 text-white px-4 py-2 rounded w-full">下一步</button>
+                </div>
+
+                <!-- 步骤2: 纠纷详情 -->
+                <div id="step-2" class="step hidden p-6">
+                    <h2 class="text-xl font-bold mb-4">纠纷详情</h2>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">纠纷类型</label>
+                        <select id="dispute-type" class="w-full border rounded p-2">
+                            <option value="contract">合同违约</option>
+                            <option value="debt">债务拖欠</option>
+                            <option value="ip">知识产权侵权</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">纠纷描述</label>
+                        <textarea id="dispute-desc" class="w-full border rounded p-2 h-32">根据合同约定，对方应于2023年12月31日前完成交付，但至今仍未履行合同义务。</textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1">您的诉求</label>
+                        <textarea id="demand" class="w-full border rounded p-2 h-24">请对方在收到本函后5个工作日内履行合同义务，否则将采取法律措施。</textarea>
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <button type="button" class="prev-step bg-gray-200 px-4 py-2 rounded">上一步</button>
+                        <button type="button" class="next-step bg-blue-600 text-white px-4 py-2 rounded">下一步</button>
+                    </div>
+                </div>
+
+                <!-- 步骤3: 预览 -->
+                <div id="step-3" class="step hidden p-6">
+                    <h2 class="text-xl font-bold mb-4">律师函预览</h2>
+                    
+                    <div id="letter-preview" class="bg-white border rounded mb-4 p-4">
+                        <!-- 预览内容将通过JavaScript动态生成 -->
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <button type="button" class="prev-step bg-gray-200 px-4 py-2 rounded">上一步</button>
+                        <button type="button" id="download-btn" class="bg-blue-600 text-white px-4 py-2 rounded">下载律师函</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const steps = document.querySelectorAll('.step');
+            let currentStep = 0;
+            
+            // 下一步按钮
+            document.querySelectorAll('.next-step').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    steps[currentStep].classList.remove('active');
+                    currentStep++;
+                    steps[currentStep].classList.add('active');
+                    
+                    if(currentStep === 2) {
+                        generatePreview();
+                    }
+                });
+            });
+            
+            // 上一步按钮
+            document.querySelectorAll('.prev-step').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    steps[currentStep].classList.remove('active');
+                    currentStep--;
+                    steps[currentStep].classList.add('active');
+                });
+            });
+            
+            // 生成预览
+            function generatePreview() {
+                const preview = document.getElementById('letter-preview');
+                const today = new Date();
+                const dateStr = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
+                
+                const letterHtml = `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="font-size: 18px; font-weight: bold;">律师函</h2>
+                    </div>
+                    
+                    <p><strong>${document.getElementById('receiver-name').value}：</strong></p>
+                    
+                    <p style="text-indent: 2em; margin-bottom: 15px;">
+                        ${document.getElementById('law-firm')}依法接受${document.getElementById('sender-name').value}的委托，指派${document.getElementById('lawyer-name').value}律师，就贵方${document.getElementById('dispute-desc').value}一事，致函如下：
+                    </p>
+                    
+                    <h3 style="font-weight: bold; margin: 15px 0 10px;">一、事实概述</h3>
+                    
+                    <p style="text-indent: 2em; margin-bottom: 15px;">
+                        ${document.getElementById('dispute-desc').value}
+                    </p>
+                    
+                    <h3 style="font-weight: bold; margin: 15px 0 10px;">二、委托人主张</h3>
+                    
+                    <p style="text-indent: 2em; margin-bottom: 15px;">
+                        ${document.getElementById('demand').value}
+                    </p>
+                    
+                    <h3 style="font-weight: bold; margin: 15px 0 10px;">三、郑重告知</h3>
+                    
+                    <p style="text-indent: 2em; margin-bottom: 15px;">
+                        若贵方未在上述期限内履行相应义务，委托人将保留通过法律途径追索一切权利的权利。
+                    </p>
+                    
+                    <div style="margin-top: 40px;">
+                        <p><strong>${document.getElementById('law-firm').value}</strong></p>
+                        <p><strong>${document.getElementById('lawyer-name').value} 律师</strong></p>
+                        <p>${dateStr}</p>
+                    </div>
+                `;
+                
+                preview.innerHTML = letterHtml;
+            }
+            
+            // 下载功能
+            document.getElementById('download-btn').addEventListener('click', function() {
+                const preview = document.getElementById('letter-preview');
+                const blob = new Blob([preview.innerText], {type: 'text/plain'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = '律师函.txt';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        });
+    </script>
+</body>
+</html>
